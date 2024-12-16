@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
+import { BaseContract, TransactionResponse  } from "ethers";
 import { abi } from "./VotingABI"; // Replace with the actual ABI file or object
 
 interface Topic {
@@ -9,6 +10,16 @@ interface Topic {
   options: string[];
   votes: number[];
   finalized: boolean;
+}
+
+interface VoteContract extends BaseContract{
+  /**
+   * Casts a vote on a specific topic with the selected option.
+   * @param topicId - The unique identifier of the topic.
+   * @param option - The selected option for voting.
+   * @returns A Promise that resolves once the transaction is processed.
+   */
+  vote(topicId: string | number, option: string | number): Promise<TransactionResponse >;
 }
 
 const MemeVoting = ({ contractAddress, rpcUrl }: { contractAddress: string; rpcUrl: string }) => {
@@ -100,7 +111,7 @@ const MemeVoting = ({ contractAddress, rpcUrl }: { contractAddress: string; rpcU
       const signerContract = contract.connect(signer);
 
       // Submit vote
-      const tx = await signerContract.vote(topicId, option);
+      const tx = await (signerContract as VoteContract).vote(topicId, option);
       await tx.wait();
 
       alert("Vote submitted successfully!");
